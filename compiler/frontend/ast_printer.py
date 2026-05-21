@@ -31,19 +31,19 @@ class AstPrinter:
 
     @visitor.when(AssignNode)
     def view(self, node: AssignNode) -> tuple[str, Sequence]:
-        return ':=', (node.var, node.value)
+        return 'assign', (node.var, node.value)
 
     @visitor.when(VarDeclNode)
     def view(self, node: VarDeclNode) -> tuple[str, Sequence]:
-        return f'var: {node.type}', node.vars
+        return 'var_decl', (node.type, *node.vars)
 
     @visitor.when(ParamNode)
     def view(self, node: ParamNode) -> tuple[str, Sequence]:
-        return f'param {node.name}: {node.type}', ()
+        return 'param', (node.name, node.type)
 
     @visitor.when(CallNode)
     def view(self, node: CallNode) -> tuple[str, Sequence]:
-        return f'{node.name}()', node.params
+        return f'call {node.name}', node.params
 
     @visitor.when(IfNode)
     def view(self, node: IfNode) -> tuple[str, Sequence]:
@@ -59,11 +59,11 @@ class AstPrinter:
     @visitor.when(ForNode)
     def view(self, node: ForNode) -> tuple[str, Sequence]:
         direction = 'downto' if node.downto else 'to'
-        return f'for {node.var} := ... {direction} ...', (node.start, node.finish, node.body)
+        return f'for ({direction})', (node.var, node.start, node.finish, node.body)
 
     @visitor.when(RepeatNode)
     def view(self, node: RepeatNode) -> tuple[str, Sequence]:
-        return 'repeat', (*node.body.stmts, node.cond)
+        return 'repeat', (node.body, node.cond)
 
     @visitor.when(BinOpNode)
     def view(self, node: BinOpNode) -> tuple[str, Sequence]:
@@ -75,26 +75,39 @@ class AstPrinter:
 
     @visitor.when(StmtListNode)
     def view(self, node: StmtListNode) -> tuple[str, Sequence]:
-        return '...', node.stmts
+        return 'stmt_list', node.stmts
 
     @visitor.when(ProgramNode)
     def view(self, node: ProgramNode) -> tuple[str, Sequence]:
         children = list(node.var_decls) + list(node.func_decls) + [node.body]
-        return str(node), children
+        return f'program {node.name}', children
 
     @visitor.when(FuncNode)
     def view(self, node: FuncNode) -> tuple[str, Sequence]:
+        kind = 'procedure' if node.return_type is None else 'function'
         children = list(node.params) + list(node.var_decls) + [node.body]
-        return str(node), children
-
-    @visitor.when(ForNode)
-    def view(self, node: ForNode) -> tuple[str, Sequence]:
-        direction = 'downto' if node.downto else 'to'
-        return f'for {node.var} := ... {direction} ...', (node.start, node.finish, node.body)
+        return f'{kind} {node.name}', children
 
     @visitor.when(TypeConvertNode)
     def view(self, node: TypeConvertNode) -> tuple[str, Sequence]:
         return f'convert({node.type})', (node.value,)
+
+    @visitor.when(BreakNode)
+    def view(self, node: BreakNode) -> tuple[str, tuple]:
+        return 'break', ()
+
+    @visitor.when(ContinueNode)
+    def view(self, node: ContinueNode) -> tuple[str, tuple]:
+        return 'continue', ()
+
+    @visitor.when(ReturnNode)
+    def view(self, node: ReturnNode) -> tuple[str, tuple]:
+        children = (node.value,) if node.value else ()
+        return 'return', children
+
+    @visitor.when(ArrayAccessNode)
+    def view(self, node: ArrayAccessNode) -> tuple[str, Sequence]:
+        return f'{node.arr}[]', (node.index,)
 
     def _tree_lines(self, node: AstNode) -> list[str]:
         result = self.view(node)
@@ -103,7 +116,6 @@ class AstPrinter:
         else:
             label, children = result, node.children
 
-        # Добавляем семантическую аннотацию
         sem = ''
         if node.node_ident:
             sem = f' : {node.node_ident}'
@@ -124,19 +136,6 @@ class AstPrinter:
     def print_tree(self, node: AstNode, file: TextIO = None) -> None:
         out = file or sys.stdout
         print(os.linesep.join(self._tree_lines(node)), file=out)
-
-    @visitor.when(BreakNode)
-    def view(self, node: BreakNode) -> tuple[str, tuple]:
-        return 'break', ()
-
-    @visitor.when(ContinueNode)
-    def view(self, node: ContinueNode) -> tuple[str, tuple]:
-        return 'continue', ()
-
-    @visitor.when(ReturnNode)
-    def view(self, node: ReturnNode) -> tuple[str, tuple]:
-        children = (node.value,) if node.value else ()
-        return 'return', children
 
     @staticmethod
     def print(node: AstNode, file: TextIO = None) -> None:
