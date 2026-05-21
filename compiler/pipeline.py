@@ -24,7 +24,7 @@ def run(
     x86_output: str = None,
 ) -> None:
 
-    # ── 1. Парсинг ────────────────────────────────────────────────────
+    # 1. Парсинг
     program = parse(source)
 
     if print_ast:
@@ -35,7 +35,7 @@ def run(
     if stop_after_parse:
         return
 
-    # ── 2. Семантический анализ ───────────────────────────────────────
+    # 2. Семантический анализ
     semantic_check(program)
 
     if print_ast_after_semantic:
@@ -46,7 +46,7 @@ def run(
     if stop_after_semantic:
         return
 
-    # ── 3. Оптимизация ────────────────────────────────────────────────
+    # 3. Оптимизация
     if not no_opt:
         optimize(program)
 
@@ -56,7 +56,7 @@ def run(
         AstPrinter.print(program)
         print()
 
-    # ── 4. Бэкенд ─────────────────────────────────────────────────────
+    # 4. Бэкенд
     if mode == 'vm':
         from compiler.backend.vm.codegen import compile_to_bytecode
         from compiler.backend.vm.vm import VM

@@ -49,9 +49,9 @@ class CodeGen:
         self._loops: list[tuple[_Label, _Label]] = []  # (start, end) для break/continue
         self._func_name: str | None = None  # имя текущей функции
 
-    # ------------------------------------------------------------------ #
-    #  Публичный API                                                       #
-    # ------------------------------------------------------------------ #
+    
+    #  Публичный API
+    
 
     def emit(self, op: Op, arg=None, row: int = None) -> None:
         self._code.append(Instr(op, arg, row))
@@ -86,9 +86,9 @@ class CodeGen:
             result.append(item)
         return result
 
-    # ------------------------------------------------------------------ #
-    #  Генерация выражений                                                 #
-    # ------------------------------------------------------------------ #
+    
+    #  Генерация выражений
+    
 
     def gen_expr(self, node: AstNode) -> None:
         if isinstance(node, LiteralNode):
@@ -195,9 +195,9 @@ class CodeGen:
             self.gen_expr(p)
         self.emit(Op.CALL, (node.name.name, len(node.params)), node.row)
 
-    # ------------------------------------------------------------------ #
-    #  Генерация операторов                                                #
-    # ------------------------------------------------------------------ #
+    
+    #  Генерация операторов
+    
 
     def gen_stmt(self, node: AstNode) -> None:
 
@@ -340,9 +340,9 @@ class CodeGen:
         self._loops.pop()
 
 
-# ------------------------------------------------------------------ #
-#  Точка входа                                                         #
-# ------------------------------------------------------------------ #
+
+#  Точка входа                                                         
+
 
 def compile_to_bytecode(program: ProgramNode) -> Bytecode:
     bc = Bytecode()

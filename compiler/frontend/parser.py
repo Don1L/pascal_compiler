@@ -16,9 +16,9 @@ def _pos(node: AstNode, meta) -> AstNode:
 @v_args(meta=True)
 class _ASTBuilder(Transformer):
 
-    # ------------------------------------------------------------------ #
-    #  Токены → строки/значения                                            #
-    # ------------------------------------------------------------------ #
+
+    #  Токены → строки/значения                                            
+
 
     def IDENT(self, tok):    return str(tok)
     def INTEGER(self, tok):  return str(tok)
@@ -35,9 +35,9 @@ class _ASTBuilder(Transformer):
     # Все остальные KW_* токены (if/then/else/begin/end/...) оставляем как Token
     # — они будут отфильтрованы в методах через isinstance(c, Token)
 
-    # ------------------------------------------------------------------ #
-    #  Базовые правила                                                     #
-    # ------------------------------------------------------------------ #
+
+    #  Базовые правила                                                     
+
 
     def ident(self, meta, ch):
         return _pos(IdentNode(ch[0]), meta)
@@ -55,9 +55,9 @@ class _ASTBuilder(Transformer):
     def literal(self, meta, ch):
         return ch[0]
 
-    # ------------------------------------------------------------------ #
-    #  Типы — возвращают TypeNode (AstNode)                               #
-    # ------------------------------------------------------------------ #
+
+    #  Типы — возвращают TypeNode (AstNode)                               
+
 
     def type_kw(self, meta, ch):
         # ch[0] — строка 'integer'/'boolean'/'char' (от KW_INTEGER и т.д.)
@@ -78,9 +78,9 @@ class _ASTBuilder(Transformer):
     def type_node(self, meta, ch):
         return ch[0]
 
-    # ------------------------------------------------------------------ #
-    #  Выражения                                                           #
-    # ------------------------------------------------------------------ #
+
+    #  Выражения                                                           
+
 
     def args(self, meta, ch):
         return [c for c in ch if isinstance(c, AstNode)]
@@ -123,9 +123,9 @@ class _ASTBuilder(Transformer):
             return nodes[0]
         return nodes or None
 
-    # ------------------------------------------------------------------ #
-    #  Операторы                                                           #
-    # ------------------------------------------------------------------ #
+
+    #  Операторы                                                           
+
 
     def assign(self, meta, ch):
         nodes = [c for c in ch if isinstance(c, AstNode)]
@@ -184,9 +184,9 @@ class _ASTBuilder(Transformer):
     def empty_stmt(self, meta, ch):
         return None
 
-    # ------------------------------------------------------------------ #
-    #  Объявления переменных                                               #
-    # ------------------------------------------------------------------ #
+
+    #  Объявления переменных                                               
+
 
     def ident_list(self, meta, ch):
         return [c for c in ch if isinstance(c, IdentNode)]
@@ -200,9 +200,9 @@ class _ASTBuilder(Transformer):
     def var_section(self, meta, ch):
         return [c for c in ch if isinstance(c, AstNode)]
 
-    # ------------------------------------------------------------------ #
-    #  Параметры функций                                                   #
-    # ------------------------------------------------------------------ #
+
+    #  Параметры функций                                                   
+
 
     def param(self, meta, ch):
         # ch[0] = list[IdentNode], ch[1] = TypeNode
@@ -248,7 +248,7 @@ class _ASTBuilder(Transformer):
         # ch: [Token(procedure), IdentNode, list[ParamNode]?, (var_decls, body)]
         items = [c for c in ch if not isinstance(c, Token)]
         name   = items[0]
-        params = items[1] if isinstance(items[1], list) and                              all(isinstance(x, ParamNode) for x in items[1]) else []
+        params = items[1] if isinstance(items[1], list) and all(isinstance(x, ParamNode) for x in items[1]) else []
         body_tuple = items[2] if params else items[1]
         var_decls, body = body_tuple
         return _pos(FuncNode(
@@ -257,9 +257,9 @@ class _ASTBuilder(Transformer):
             var_decls=var_decls, body=body,
         ), meta)
 
-    # ------------------------------------------------------------------ #
-    #  Программа                                                           #
-    # ------------------------------------------------------------------ #
+
+    #  Программа                                                           
+
 
     def program(self, meta, ch):
         name = None
@@ -284,9 +284,9 @@ class _ASTBuilder(Transformer):
         return _pos(ProgramNode(name, var_decls, func_decls, body), meta)
 
 
-# ------------------------------------------------------------------ #
-#  Публичная функция парсинга                                         #
-# ------------------------------------------------------------------ #
+
+#  Публичная функция парсинга
+
 
 _parser = Lark(_grammar, start='start', propagate_positions=True, parser='earley')
 

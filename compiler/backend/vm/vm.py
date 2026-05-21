@@ -68,9 +68,9 @@ class VM:
         self._frame:  Frame | None = None
         self._bc:     Bytecode | None = None
 
-    # ------------------------------------------------------------------ #
-    #  Стек                                                                #
-    # ------------------------------------------------------------------ #
+     
+    #  Стек                                                                
+     
 
     def _push(self, v):
         self._stack.append(v)
@@ -83,9 +83,9 @@ class VM:
     def _peek(self):
         return self._stack[-1]
 
-    # ------------------------------------------------------------------ #
-    #  Запуск                                                              #
-    # ------------------------------------------------------------------ #
+     
+    #  Запуск                                                              
+     
 
     def run(self, bc: Bytecode, program: ProgramNode = None) -> None:
         self._bc = bc
@@ -113,14 +113,14 @@ class VM:
             op  = instr.op
             arg = instr.arg
 
-            # ── Стек ──────────────────────────────────────────────────
+            #   Стек  
             if op == Op.PUSH:
                 self._push(arg)
 
             elif op == Op.POP:
                 self._pop()
 
-            # ── Переменные ────────────────────────────────────────────
+            #   Переменные                       
             elif op == Op.LOAD:
                 self._push(frame.get(arg))
 
@@ -140,7 +140,7 @@ class VM:
                 lo    = frame.get_lo(arg)
                 arr[idx - lo] = value
 
-            # ── Арифметика ────────────────────────────────────────────
+            #   Арифметика                       
             elif op == Op.ADD:
                 b, a = self._pop(), self._pop()
                 self._push(a + b)
@@ -168,7 +168,7 @@ class VM:
             elif op == Op.NEG:
                 self._push(-self._pop())
 
-            # ── Сравнения ─────────────────────────────────────────────
+            #   Сравнения
             elif op == Op.EQ:
                 b, a = self._pop(), self._pop(); self._push(a == b)
             elif op == Op.NE:
@@ -182,7 +182,7 @@ class VM:
             elif op == Op.GE:
                 b, a = self._pop(), self._pop(); self._push(a >= b)
 
-            # ── Логика ────────────────────────────────────────────────
+            #   Логика                         
             elif op == Op.AND:
                 b, a = self._pop(), self._pop(); self._push(a and b)
             elif op == Op.OR:
@@ -190,7 +190,7 @@ class VM:
             elif op == Op.NOT:
                 self._push(not self._pop())
 
-            # ── Переходы ──────────────────────────────────────────────
+            #   Переходы                        
             elif op == Op.JUMP:
                 frame.ip = arg
 
@@ -198,7 +198,7 @@ class VM:
                 if not self._pop():
                     frame.ip = arg
 
-            # ── Функции ───────────────────────────────────────────────
+            #   Функции
             elif op == Op.CALL:
                 func_name, n_args = arg
                 args = [self._pop() for _ in range(n_args)]
@@ -241,7 +241,7 @@ class VM:
                 frame = frame.ret_frame
                 self._frame = frame
 
-            # ── Встроенные операции ───────────────────────────────────
+            #   Встроенные операции
             elif op == Op.PRINT:
                 newline = arg
                 val = self._pop()
@@ -273,16 +273,16 @@ class VM:
             elif op == Op.ABS:
                 self._push(abs(self._pop()))
 
-            # ── Конец программы ───────────────────────────────────────
+            #   Конец программы
             elif op == Op.HALT:
                 break
 
             else:
                 raise RuntimeException(f'Неизвестная инструкция: {op}')
 
-    # ------------------------------------------------------------------ #
-    #  Вспомогательные методы                                              #
-    # ------------------------------------------------------------------ #
+     
+    #  Вспомогательные методы
+     
 
     @staticmethod
     def _default(type_node) -> object:
