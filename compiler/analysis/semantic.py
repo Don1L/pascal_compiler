@@ -6,9 +6,9 @@ from compiler.frontend.ast import *
 from compiler.errors import SemanticException
 
 
-# ===========================================================================
+ 
 # Система типов
-# ===========================================================================
+ 
 
 class BaseType(Enum):
     VOID    = 'void'
@@ -111,9 +111,9 @@ CHAR    = TypeDesc.CHAR     # noqa
 VOID    = TypeDesc.VOID     # noqa
 
 
-# ===========================================================================
+ 
 # Таблица символов
-# ===========================================================================
+ 
 
 class ScopeKind(Enum):
     GLOBAL = 'global'
@@ -211,9 +211,9 @@ class IdentScope:
         return None
 
 
-# ===========================================================================
+ 
 # Таблицы совместимости типов для операций
-# ===========================================================================
+ 
 
 UN_OP_TYPES: dict[UnOp, dict[TypeDesc, TypeDesc]] = {
     UnOp.NOT:   {BOOLEAN: BOOLEAN},
@@ -262,9 +262,9 @@ BUILTINS: list[IdentDesc] = [
 ]
 
 
-# ===========================================================================
+ 
 # Семантический анализатор
-# ===========================================================================
+ 
 
 def _err(node: AstNode, msg: str):
     raise SemanticException(msg, row=node.row, col=node.col)
@@ -276,7 +276,7 @@ class SemanticChecker:
     def check(self, node, scope: IdentScope):
         pass
 
-    # ---- Литералы ----
+    #   Литералы  
 
     @visitor.when(LiteralNode)
     def check(self, node: LiteralNode, scope: IdentScope):
@@ -289,7 +289,7 @@ class SemanticChecker:
         elif isinstance(node.value, str):
             node.node_type = CHAR
 
-    # ---- Идентификатор (использование) ----
+    #   Идентификатор (использование)  
 
     @visitor.when(IdentNode)
     def check(self, node: IdentNode, scope: IdentScope):
@@ -299,7 +299,7 @@ class SemanticChecker:
         node.node_ident = ident
         node.node_type = ident.type
 
-    # ---- Доступ к элементу массива ----
+    #   Доступ к элементу массива  
 
     @visitor.when(ArrayAccessNode)
     def check(self, node: ArrayAccessNode, scope: IdentScope):
@@ -312,7 +312,7 @@ class SemanticChecker:
             _err(node, 'Индекс массива должен быть integer')
         node.node_type = arr_type.elem_type
 
-    # ---- Унарные операции ----
+    #   Унарные операции  
 
     @visitor.when(UnOpNode)
     def check(self, node: UnOpNode, scope: IdentScope):
@@ -324,7 +324,7 @@ class SemanticChecker:
             _err(node, f'Оператор "{node.op}" неприменим к типу {arg_t}')
         node.node_type = result
 
-    # ---- Бинарные операции ----
+    #   Бинарные операции  
 
     @visitor.when(BinOpNode)
     def check(self, node: BinOpNode, scope: IdentScope):
@@ -337,7 +337,7 @@ class SemanticChecker:
             _err(node, f'Оператор "{node.op}" неприменим к типам {t1} и {t2}')
         node.node_type = result
 
-    # ---- Присваивание ----
+    #   Присваивание  
 
     @visitor.when(AssignNode)
     def check(self, node: AssignNode, scope: IdentScope):
@@ -361,7 +361,7 @@ class SemanticChecker:
             _err(node, f'Нельзя присвоить {val_t} переменной типа {var_t}')
         node.node_type = var_t
 
-    # ---- Вызов функции/процедуры ----
+    #   Вызов функции/процедуры  
 
     @visitor.when(CallNode)
     def check(self, node: CallNode, scope: IdentScope):
@@ -399,7 +399,7 @@ class SemanticChecker:
         node.name.node_ident = matched
         node.node_type = matched.type.return_type
 
-    # ---- if ----
+    #   if  
 
     @visitor.when(IfNode)
     def check(self, node: IfNode, scope: IdentScope):
@@ -410,7 +410,7 @@ class SemanticChecker:
         if node.else_stmt:
             self.check(node.else_stmt, scope)
 
-    # ---- while ----
+    #   while  
 
     @visitor.when(WhileNode)
     def check(self, node: WhileNode, scope: IdentScope):
@@ -420,7 +420,7 @@ class SemanticChecker:
         loop_scope = IdentScope(parent=scope, loop=node)
         self.check(node.body, loop_scope)
 
-    # ---- repeat ----
+    #   repeat  
 
     @visitor.when(RepeatNode)
     def check(self, node: RepeatNode, scope: IdentScope):
@@ -430,7 +430,7 @@ class SemanticChecker:
         if node.cond.node_type != BOOLEAN:
             _err(node.cond, f'Условие repeat..until должно быть boolean')
 
-    # ---- for ----
+    #   for  
 
     @visitor.when(ForNode)
     def check(self, node: ForNode, scope: IdentScope):
@@ -446,7 +446,7 @@ class SemanticChecker:
         loop_scope = IdentScope(parent=scope, loop=node)
         self.check(node.body, loop_scope)
 
-    # ---- break / continue ----
+    #   break / continue  
 
     @visitor.when(BreakNode)
     def check(self, node: BreakNode, scope: IdentScope):
@@ -458,7 +458,7 @@ class SemanticChecker:
         if scope.loop_scope is None:
             _err(node, 'continue вне цикла')
 
-    # ---- return ----
+    #   return  
 
     @visitor.when(ReturnNode)
     def check(self, node: ReturnNode, scope: IdentScope):
@@ -471,14 +471,14 @@ class SemanticChecker:
             if node.value.node_type != expected:
                 _err(node, f'return: ожидается {expected}, получен {node.value.node_type}')
 
-    # ---- Список операторов ----
+    #   Список операторов  
 
     @visitor.when(StmtListNode)
     def check(self, node: StmtListNode, scope: IdentScope):
         for stmt in node.stmts:
             self.check(stmt, scope)
 
-    # ---- Объявление переменных ----
+    #   Объявление переменных  
 
     @visitor.when(VarDeclNode)
     def check(self, node: VarDeclNode, scope: IdentScope):
@@ -492,7 +492,7 @@ class SemanticChecker:
             var_ident.node_ident = ident
             var_ident.node_type = type_desc
 
-    # ---- Объявление функции/процедуры ----
+    #   Объявление функции/процедуры  
 
     @visitor.when(FuncNode)
     def check(self, node: FuncNode, scope: IdentScope):
@@ -514,7 +514,7 @@ class SemanticChecker:
 
         self.check(node.body, func_scope)
 
-    # ---- Программа ----
+    #   Программа  
 
     @visitor.when(ProgramNode)
     def check(self, node: ProgramNode, scope: IdentScope):
@@ -525,9 +525,9 @@ class SemanticChecker:
         self.check(node.body, scope)
 
 
-# ---------------------------------------------------------------------------
+
 # Вспомогательные функции
-# ---------------------------------------------------------------------------
+
 
 def _resolve_type(type_node: TypeNode) -> TypeDesc:
     if type_node.name == 'array':

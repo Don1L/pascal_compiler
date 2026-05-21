@@ -31,9 +31,9 @@ class Optimizer:
         """Точка входа — оптимизирует программу и возвращает новый AST."""
         return self._opt(node)
 
-    # ------------------------------------------------------------------ #
-    #  Диспетчер                                                           #
-    # ------------------------------------------------------------------ #
+
+    #  Диспетчер
+
 
     def _opt(self, node: AstNode) -> AstNode:
         if node is None:
@@ -67,9 +67,9 @@ class Optimizer:
         # Всё остальное (литералы, идентификаторы и т.д.) — без изменений
         return node
 
-    # ------------------------------------------------------------------ #
-    #  Программа и функции                                                 #
-    # ------------------------------------------------------------------ #
+
+    #  Программа и функции
+
 
     def _opt_program(self, node: ProgramNode) -> ProgramNode:
         new_funcs = [self._opt_func(f) for f in node.func_decls]
@@ -82,9 +82,9 @@ class Optimizer:
         node.body = self._opt_stmtlist(node.body)
         return node
 
-    # ------------------------------------------------------------------ #
-    #  Список операторов — dead code elimination                           #
-    # ------------------------------------------------------------------ #
+
+    #  Список операторов — dead code elimination
+
 
     def _opt_stmtlist(self, node: StmtListNode) -> StmtListNode:
         new_stmts = []
@@ -99,9 +99,9 @@ class Optimizer:
         node.stmts = tuple(new_stmts)
         return node
 
-    # ------------------------------------------------------------------ #
-    #  Операторы                                                           #
-    # ------------------------------------------------------------------ #
+
+    #  Операторы
+
 
     def _opt_assign(self, node: AssignNode) -> AssignNode:
         node.value = self._opt(node.value)
@@ -143,9 +143,8 @@ class Optimizer:
         node.body   = self._opt(node.body)
         return node
 
-    # ------------------------------------------------------------------ #
-    #  Бинарные операции — constant folding + algebraic simplification    #
-    # ------------------------------------------------------------------ #
+
+    #  Бинарные операции — constant folding + algebraic simplification
 
     def _opt_binop(self, node: BinOpNode) -> AstNode:
         node.arg1 = self._opt(node.arg1)
@@ -155,7 +154,7 @@ class Optimizer:
         b = node.arg2
         op = node.op
 
-        # ── Constant folding ──────────────────────────────────────────
+        # Constant folding
         if isinstance(a, LiteralNode) and isinstance(b, LiteralNode):
             result = self._fold(op, a.value, b.value)
             if result is not None:
@@ -165,7 +164,7 @@ class Optimizer:
                 lit.node_type = node.node_type
                 return lit
 
-        # ── Algebraic simplification ──────────────────────────────────
+        # Algebraic simplification
 
         # x + 0 → x,  0 + x → x
         if op == BinOp.ADD:
@@ -241,9 +240,7 @@ class Optimizer:
             pass
         return None
 
-    # ------------------------------------------------------------------ #
-    #  Унарные операции                                                    #
-    # ------------------------------------------------------------------ #
+    #  Унарные операции
 
     def _opt_unop(self, node: UnOpNode) -> AstNode:
         node.arg = self._opt(node.arg)
@@ -274,9 +271,9 @@ class Optimizer:
 
         return node
 
-    # ------------------------------------------------------------------ #
-    #  Вызов функции                                                       #
-    # ------------------------------------------------------------------ #
+
+    #  Вызов функции
+
 
     def _opt_call(self, node: CallNode) -> CallNode:
         node.params = tuple(self._opt(p) for p in node.params)
@@ -287,9 +284,9 @@ class Optimizer:
         return node
 
 
-# ---------------------------------------------------------------------------
+
 # Вспомогательные функции
-# ---------------------------------------------------------------------------
+
 
 def _is_zero(node: AstNode) -> bool:
     return isinstance(node, LiteralNode) and node.value == 0
@@ -319,9 +316,7 @@ def _make_neg(node: AstNode, src: AstNode) -> UnOpNode:
     return neg
 
 
-# ---------------------------------------------------------------------------
 # Публичная функция
-# ---------------------------------------------------------------------------
 
 def optimize(program: ProgramNode) -> ProgramNode:
     """Запускает все оптимизации и возвращает изменённое дерево."""
